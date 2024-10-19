@@ -1,0 +1,12 @@
+{
+  "name": "melodia",
+  "version": "1.0.0",
+  "description": "A simple YouTube audio player bot",
+  "main": "melodia.js",
+  "dependencies": {
+    "@discordjs/voice": "^0.17.0",
+    "axios": "^1.7.7",
+    "discord.js": "^14.16.3",
+    "ytdl-core": "^4.11.5"
+  }
+}
