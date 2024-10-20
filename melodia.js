@@ -16,6 +16,12 @@ const client = new Client({
 const servers = new Map();
 const prefix = "/melodia";
 
+client.once('ready', () => {
+    client.user.setActivity('/melodia help', {
+        type: 'PLAYING',
+    });
+});
+
 client.on('messageCreate', async (message) => {
     if (!message.content.startsWith(prefix)) return;
 
@@ -36,6 +42,8 @@ client.on('messageCreate', async (message) => {
 
             if (server.queue.length === 0) {
                 if (server.connection) {
+                    message.channel.send(`Disconnect from **${message.member.voice.channel.name}**`);
+
                     server.connection.disconnect();
                     server.connection = null;
                 }
@@ -51,7 +59,7 @@ client.on('messageCreate', async (message) => {
         case "play":
             if (!message.member.voice.channel) {
                 message.react('😓');
-                message.reply("Please join a voice channel before calling this command");
+                message.reply(`Please join a voice channel before calling '*/melodia play*'`);
                 
                 return;
             }
@@ -84,7 +92,7 @@ client.on('messageCreate', async (message) => {
 
                     if (response.data.items.length === 0) {
                         message.react('😓');
-                        message.reply("Can't find what you're looking for");
+                        message.reply(`Can't find what you're looking for. Please try another query`);
                         
                         return;
                     }
@@ -103,7 +111,7 @@ client.on('messageCreate', async (message) => {
 
             if (server.queue.length > 1) {
                 message.react('👌');
-                message.reply(`Added "${(await ytdl.getInfo(url)).videoDetails.title}" to queue`);
+                message.reply(`Added "**${(await ytdl.getInfo(url)).videoDetails.title}**" to queue`);
             } else {
                 playAudio(message, server);
             }
@@ -111,24 +119,125 @@ client.on('messageCreate', async (message) => {
             break;
 
         case "pause":
-            
+            if (!server.connection) {
+                message.react('😓');
+                message.reply(`I'm not in any voice channel at the moment`);
+
+                return;
+            }
+
+            if (server.player.state.status === AudioPlayerStatus.Playing) {
+                message.react('👌');
+                message.reply(`"**${(await ytdl.getInfo(server.queue[0])).videoDetails.title}**" has been paused`);
+                
+                server.player.pause();
+            } else {
+                message.react('😓');
+                message.reply(`Playback is already paused`);
+            }
         
             break;
 
         case "resume":
-            
+            if (!server.connection) {
+                message.react('😓');
+                message.reply(`I'm not in any voice channel at the moment`);
+
+                return;
+            }
+
+            if (server.player.state.status === AudioPlayerStatus.Paused) {
+                message.react('👌');
+                message.reply(`"**${(await ytdl.getInfo(server.queue[0])).videoDetails.title}**" has been resumed`);
+                
+                server.player.unpause();
+            } else {
+                message.react('😓');
+                message.reply(`Playback is already playing`);
+            }
         
             break;
 
         case "next":
-            
+            if (!server.connection) {
+                message.react('😓');
+                message.reply(`I'm not in any voice channel at the moment`);
+
+                return;
+            }
+
+            const skipCount = Math.max(parseInt(argument), 1);
+
+            message.react('👌');
+            message.reply(`Skipped ${skipCount} item(s) from queue`);
+
+            server.queue.splice(0, skipCount);
+            server.player.stop();
         
             break;
 
         case "stop":
-            
+            if (!server.connection) {
+                message.react('😓');
+                message.reply(`I'm not in any voice channel at the moment`);
+
+                return;
+            }
+
+            message.react('👌');
+            message.reply(`Playback has been stopped and queue has been cleared`);
+
+            server.queue = [];
+            server.player.stop();
         
             break;
+
+        case "queue":
+            if (!server.connection) {
+                message.react('😓');
+                message.reply(`I'm not in any voice channel at the moment`);
+
+                return;
+            }
+
+            const currentTitle = (await ytdl.getInfo(server.queue[0])).videoDetails.title;
+            const queueTitles = await Promise.all(server.queue.slice(1).map(async (url) => {
+                const title = (await ytdl.getInfo(url)).videoDetails.title;
+
+                return title
+            }));
+            const queue = queueTitles.map((title, index) => `${index + 1}. **${title}**`).join('\n');
+
+            message.react('👌');
+            message.reply(
+                `Currently playing: **${currentTitle}** \n
+                \n
+                Queue: \n
+                ${queue || "*Queue is currently empty.*"}`
+            );
+
+            break;
+
+        case "help":
+            message.react('👌');
+            message.reply(
+                `**Melodia command list:** \n
+                \n
+                */melodia play [query]*: Search YouTube and play the first result \n
+                */melodia pause*: Pause the playback \n
+                */melodia resume*: Resume the playback \n
+                */melodia next [number of skips]*: Skip to the next few song (default: 1) \n
+                */melodia stop*: Stop the playback, clear the queue, and disconnect from the voice channel \n
+                */melodia queue*: View the queue \n
+                \n
+                **Thank you for using Melodia!** ^_^`
+            );
+
+            break;
+
+        default:
+            message.react('😓');
+            message.reply(`I'm not sure what you'd like me to do. Please call '*/melodia help*' to view the available commands`);
     }
 });
 
@@ -148,7 +257,7 @@ async function playAudio(message, server) {
     }));
 
     message.react('👌');
-    message.reply(`Now playing "${(await ytdl.getInfo(url)).videoDetails.title}"`);
+    message.channel.send(`Now playing "${(await ytdl.getInfo(url)).videoDetails.title}"`);
 
     server.player.play(resource);
 }
