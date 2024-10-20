@@ -1,6 +1,6 @@
-const { Client, GatewayIntentBits } = require('discordjs');
+const { Client, GatewayIntentBits } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
-const ytdl =  require('ytdl-core');
+const ytdl =  require('@distube/ytdl-core');
 const axios = require('axios');
 
 const TOKEN = process.env.TOKEN;

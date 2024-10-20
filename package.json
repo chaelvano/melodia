@@ -5,8 +5,8 @@
   "main": "melodia.js",
   "dependencies": {
     "@discordjs/voice": "^0.17.0",
+    "@distube/ytdl-core": "^4.14.4",
     "axios": "^1.7.7",
-    "discord.js": "^14.16.3",
-    "ytdl-core": "^4.11.5"
+    "discord.js": "^14.16.3"
   }
 }
