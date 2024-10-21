@@ -1,6 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
-const ytdl =  require('@distube/ytdl-core');
+const ytdl = require('@distube/ytdl-core');
 const axios = require('axios');
 
 const TOKEN = process.env.TOKEN;
@@ -206,32 +206,16 @@ client.on('messageCreate', async (message) => {
 
                 return title
             }));
-            const queue = queueTitles.map((title, index) => `${index + 1}. **${title}**`).join('\n');
+            const queue = queueTitles.map((title, index) => `> ${index + 1}. **${title}**`).join('\n');
 
             message.react('👌');
-            message.reply(
-                `Currently playing: **${currentTitle}** \n
-                \n
-                Queue: \n
-                ${queue || "*Queue is currently empty.*"}`
-            );
+            message.reply(`Currently playing: **${currentTitle}** \n\nQueue: \n${queue || "*Queue is currently empty*"}`);
 
             break;
 
         case "help":
             message.react('👌');
-            message.reply(
-                `**Melodia command list:** \n
-                \n
-                */melodia play [query]*: Search YouTube and play the first result \n
-                */melodia pause*: Pause the playback \n
-                */melodia resume*: Resume the playback \n
-                */melodia next [number of skips]*: Skip to the next few song (default: 1) \n
-                */melodia stop*: Stop the playback, clear the queue, and disconnect from the voice channel \n
-                */melodia queue*: View the queue \n
-                \n
-                **Thank you for using Melodia!** ^_^`
-            );
+            message.reply(`**Melodia command list:** \n\n***/melodia play* [query]**: Search YouTube and play the first result \n***/melodia pause***: Pause the playback \n***/melodia resume***: Resume the playback \n***/melodia next* [number of skips]**: Skip to the next few song (default: 1) \n***/melodia stop***: Stop the playback, clear the queue, and disconnect from the voice channel \n***/melodia queue***: View the queue \n\n**Thank you for using Melodia!** ^_^`);
 
             break;
 
