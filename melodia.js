@@ -42,7 +42,7 @@ client.on('messageCreate', async (message) => {
 
             if (server.queue.length === 0) {
                 if (server.connection) {
-                    message.channel.send(`Disconnect from **${message.member.voice.channel.name}**`);
+                    message.channel.send(`Disconnected from **${message.member.voice.channel.name}**`);
 
                     server.connection.disconnect();
                     server.connection = null;
